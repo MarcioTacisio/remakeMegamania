@@ -143,6 +143,9 @@ export default class GameScene extends Phaser.Scene {
       this.audio.playDeath();
       this.cameras.main.shake(200, 0.008);
     }
+    if (this.player.lives <= 0 && !this.gameOverFlag) {
+      this.onGameOver();
+    }
   }
 
   enemyShoot(x, y) {

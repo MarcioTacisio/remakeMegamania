@@ -59,34 +59,27 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.setVisible(false);
     this.body.enable = false;
 
-    let respawnDelay = 1500;
-    if (this.lives <= 0) {
-      respawnDelay = 500;
-    }
+    if (this.lives > 0) {
+      this.scene.time.delayedCall(1500, () => {
+        this.isDead = false;
+        this.setPosition(GAME_WIDTH / 2, GAME_HEIGHT - 20);
+        this.setVisible(true);
+        this.body.enable = true;
+        this.alpha = 0.4;
 
-    this.scene.time.delayedCall(respawnDelay, () => {
-      if (this.lives <= 0) {
-        this.scene.onGameOver();
-        return;
-      }
-      this.isDead = false;
-      this.setPosition(GAME_WIDTH / 2, GAME_HEIGHT - 20);
-      this.setVisible(true);
-      this.body.enable = true;
-      this.alpha = 0.4;
-
-      this.scene.tweens.add({
-        targets: this,
-        alpha: 1,
-        duration: 100,
-        yoyo: true,
-        repeat: 6,
-        onComplete: () => {
-          this.isInvincible = false;
-          this.alpha = 1;
-        }
+        this.scene.tweens.add({
+          targets: this,
+          alpha: 1,
+          duration: 100,
+          yoyo: true,
+          repeat: 6,
+          onComplete: () => {
+            this.isInvincible = false;
+            this.alpha = 1;
+          }
+        });
       });
-    });
+    }
 
     return true;
   }

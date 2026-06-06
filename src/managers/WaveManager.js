@@ -11,14 +11,12 @@ export default class WaveManager {
     this.totalWaves = 0;
     this.waveActive = false;
     this.shootTimer = 0;
-    this.bossSpawned = false; // controla se o boss já foi gerado nesta wave
   }
 
   startLevel(level) {
     this.currentLevel = level;
     this.currentWave = 0;
     this.totalWaves = WAVE_COUNTS[level % WAVE_COUNTS.length] || 5;
-    this.bossSpawned = false; // reinicia flag ao iniciar nível
     this.spawnWave();
   }
 
@@ -59,14 +57,6 @@ export default class WaveManager {
 
     const active = group.getChildren().filter(e => e.active);
     if (active.length === 0) {
-      // Se ainda não gerou o boss para esta wave, cria‑lo agora
-      if (!this.bossSpawned) {
-        this.spawnBoss();
-        this.bossSpawned = true;
-        return; // mantém a wave ativa até o boss ser derrotado
-      }
-
-      // Boss já foi derrotado, a wave está concluída
       this.waveActive = false;
       this.currentWave++;
       this.scene.onWaveComplete();
