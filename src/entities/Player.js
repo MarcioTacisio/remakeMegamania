@@ -14,6 +14,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.isInvincible = false;
     this.isDead = false;
     this.fireTimer = 0;
+    this.shieldActive = false; // escudo ativo
   }
 
   update(delta, input, bulletGroup, audio, laserSound) {
