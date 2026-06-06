@@ -19,7 +19,7 @@ export default class BootScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     this.time.delayedCall(300, () => {
-      this.scene.start('GameScene');
+      this.scene.start('TitleScene');
     });
   }
 }

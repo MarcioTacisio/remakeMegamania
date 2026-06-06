@@ -18,6 +18,9 @@ export default class GameScene extends Phaser.Scene {
     this.score = 0;
     this.currentLevel = 0;
     this.gameOverFlag = false;
+    this.isPaused = false;
+
+    this.createStarfield();
 
     this.audio = new AudioManager();
     this.audio.init();
@@ -51,10 +54,48 @@ export default class GameScene extends Phaser.Scene {
       fontFamily: 'monospace', fontSize: '7px', color: '#FF0000'
     }).setOrigin(0.5);
 
+    this.pauseKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+
+    this.pauseOverlay = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.5).setDepth(10).setVisible(false);
+    this.pauseText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'PAUSA', {
+      fontFamily: 'Courier New, monospace',
+      fontSize: '16px',
+      color: '#FFFFFF',
+    }).setOrigin(0.5).setDepth(11).setVisible(false);
+
     this.audio.resume();
 
       this.audio.startMusic();
       this.waveManager.startLevel(this.currentLevel);
+  }
+
+  createStarfield() {
+    this.stars = [];
+    for (let i = 0; i < 50; i++) {
+      this.stars.push({
+        x: Math.random() * GAME_WIDTH,
+        y: Math.random() * GAME_HEIGHT,
+        size: Math.random() < 0.2 ? 2 : 1,
+        speed: 5 + Math.random() * 15,
+        alpha: 0.2 + Math.random() * 0.6,
+      });
+    }
+    this.starGraphics = this.add.graphics().setDepth(-1);
+  }
+
+  updateStarfield(delta) {
+    const g = this.starGraphics;
+    g.clear();
+
+    for (const s of this.stars) {
+      s.y += s.speed * (delta / 1000);
+      if (s.y > GAME_HEIGHT) {
+        s.y = 0;
+        s.x = Math.random() * GAME_WIDTH;
+      }
+      g.fillStyle(0xFFFFFF, s.alpha);
+      g.fillRect(Math.round(s.x), Math.round(s.y), s.size, s.size);
+    }
   }
 
   createHUD() {
@@ -205,6 +246,27 @@ export default class GameScene extends Phaser.Scene {
 
   update(time, delta) {
     if (this.gameOverFlag) return;
+
+    if (Phaser.Input.Keyboard.JustDown(this.pauseKey)) {
+      this.isPaused = !this.isPaused;
+      this.pauseOverlay.setVisible(this.isPaused);
+      this.pauseText.setVisible(this.isPaused);
+      if (this.isPaused) {
+        this.audio.stopMusic();
+        this.physics.world.pause();
+        this.time.paused = true;
+        this.tweens.pauseAll();
+      } else {
+        this.audio.startMusic();
+        this.physics.world.resume();
+        this.time.paused = false;
+        this.tweens.resumeAll();
+      }
+    }
+
+    this.updateStarfield(delta);
+
+    if (this.isPaused) return;
 
     this.cleanBullets(this.playerBullets);
     this.cleanBullets(this.enemyBullets);
